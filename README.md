@@ -200,9 +200,10 @@
 ![ERD](https://drive.google.com/uc?export=view&id=1aYq6CCC___1LNizJXIKTGTxxJM5qBSEI)
 
 ## TIL 및 회고
-- 이번 프로젝트에서는 
-
-
+- 이번 프로젝트에서는 CI/CD Pipeline 구축을 담당했다. 
+AWS에 직접 배포는 많이 해봤지만 Jenkins, Docker, Git Action 등 처음 사용해 본 기술이 많아서 얻어가는 것이 많았던 프로젝트였다.
+코드를 작성하는 것보다는 새로 공부해야 할 내용도 많고 에러도 많이 나서 시간은 오래 걸렸지만 
+그동안 대충 어떤 개념인지만 알고 있던 CI/CD를 직접 구축해보니 자동 배포의 흐름과 개념에 대해 확실하게 정립되었다. 
 
 <details>
   <summary>ISSUE: EC2 디스크 부족</summary>
