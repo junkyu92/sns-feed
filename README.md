@@ -4,21 +4,21 @@
 <div align="center">
 
 | <img src="https://drive.google.com/uc?export=view&id=1zV9DywkNWbgT5dJIuMNNHMfft0GnkoDU" width="140" height="140"> | <img src="https://drive.google.com/uc?export=view&id=1xZq17TkXxbKIMou_1N8HI5jJ1hGuKmD4" width="140" height="140"> | <img src="https://drive.google.com/uc?export=view&id=1W6rZe96xwdXJeNULFtXOm8Iip6tzN0B6" width="140" height="140"> | <img src="https://drive.google.com/uc?export=view&id=1fBa0aPyXRkrijdG6o3RQcj5ahm_dSktb" width="140" height="140"> |  
-|------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------|  
-| Back-End                                                                                                   | Back-End                                                                                                        | Back-End                                                                                                                                  | Back-End                                                                                                        |                                                                                                 |
-| [이준규](https://github.com/junkyu92)                                                                         | [이현정](https://github.com/12hyeon)                                                                               | [최승호](https://github.com/madst0614)                                                                                                    | [조현수](https://github.com/HyunsooZo)                                                                            |
+|------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------|  
+| Back-End (팀장)                                                                                                    | Back-End                                                                                                        | Back-End                                                                                                                                  | Back-End                                                                                                        |                                                                                                 |
+| [이준규](https://github.com/junkyu92)                                                                               | [이현정](https://github.com/12hyeon)                                                                               | [최승호](https://github.com/madst0614)                                                                                                    | [조현수](https://github.com/HyunsooZo)                                                                            |
 
 </div>
 
 ## 목차
 - [개요](#개요)
+- [프로젝트 관리 및 일정](#프로젝트-관리-및-일정)
 - [사용기술](#사용기술)
 - [API 문서](#API-문서)
 - [구현 기능](#구현기능)
 - [시스템 구성도](#시스템-구성도)
 - [ERD](#ERD)
-- [TIL 및 회고](#프로젝트-관리-및-회고
-  )
+- [TIL 및 회고](#프로젝트-관리-및-회고)
 
 
 ## 개요
@@ -30,9 +30,9 @@
 <br/>
 
 
-## 프로젝트 관리 및 회고
-[![Notion](https://img.shields.io/badge/Notion_문서로_확인하기_(클릭!)-%23000000.svg?style=for-the-badge&logo=notion&logoColor=white)](https://www.notion.so/75c5a817b6b24a98850ff8ca17a8f929?v=8562a6e059c64b7a86d03497f5012cb3&pvs=4)
-
+## 프로젝트 관리 및 일정
+[![Notion](https://img.shields.io/badge/Notion_문서로_확인하기_(클릭!)-%23000000.svg?style=for-the-badge&logo=notion&logoColor=white)](https://invited-town-199.notion.site/Team-N-8eb74edcabc246b2b4aa37b72c5d0707?p=251cafd32bf14284a54d95a0cff54b9b&pm=c)
+![schedule.png](./readme_source/schedule.png)
 
 ## 사용기술
 
@@ -78,120 +78,83 @@
 ## 구현기능
 
 <details>
-  <summary>회원가입 및 인증 기능</summary>
-
-- **구현 기능** <br>
-  사용자 회원가입 및 이메일 인증 기능을 구현했습니다.
-
-- **구현 방법** <br>
-- 이메일 형식 확인 -> `javax.validation`의 `@Email` 어노테이션 사용
-- 계정 중복 확인 -> `UserRepository`조회하여 중복 시 예외 던짐
-- 비밀번호 검증 -> 별도의 `ValidationUtil` 클래스 만들어 4개 케이스 검증
-
-```  
-  자주쓰는 비밀번호
-  연속된 문자 혹은 숫자(3회이상)
-  동일한 문자,숫자 반복 (3회이상)
-  숫자문자특문 중 2가지 이상 포함)
-  추가로 `javax.validation`의 `@size`사용하여 길이 검증 
-```
-- 회원가입 완료 시 인증메일 전송 (`java-mail-sender` 사용)
-    - 멀티쓰레딩을 이용한 비동기처리로 응답 속도 향상 (`@Async`사용)
-    - 메일로 보낸 OTP(6자리 난수)는 계정을 키, OTP를 값으로 하여 `redis` 에 저장 (10분 유효)
-    - 사용자 상태는 미인증
-- 인증번호,계정,비밀번호 입력 시 `redis`에서 찾아 비교 후 상태 업데이트 (인증)
-
-- 추가로 인증번호(OTP) 재전송 기능 구현하여 메일서버 불안정에 대처할 수 있는 api구현
-</details>
-
-<details>
-  <summary>로그인 및 SpringSecurity + JWT 토큰</summary>
-
-- **구현 기능** <br>
-    - SpringSecurity와 JWT , 그리고 로그인 기능 구현
-
-- **구현 방법** <br>
-    - 사용자 로그인 진행 시 엑세스/리프레시 토큰 각각 발급
-    - 발급된 리프레시 토큰은 계정을 키로하여 `redis`에 저장하고
-    - api호출 시점마다 헤더에서 `accessToken`을 추출해 JWT커스텀필터에서 검증 (Bearer 토큰 사용)
-    - `accessToken`만료시 사용할수 있는 토큰 재발급 api를 호출하면
-      `redis`에 저장되어있는 `refreshToken`과 비교, 토큰 유효성검증 후 유효할 경우 `accessToken`재발급하여 반환
-    - `SpringSecurity`에서 사용되는 `UserDetails`데이터의 경우 `UserDetailsServiceImpl`로 `UserDetailsService`를 구현하여처리
-    - 참고이미지(출처:본인)
-      ![image](https://drive.google.com/uc?id=1YYiXNdWHMfrcpCIv2FUoLUIOJnuYXf_S)
-</details>
-
-
-<details>
-  <summary>회원관리기능 (비밀번호 초기화 / 비밀번호 변경 / 로그아웃)</summary>
-
-- **구현 기능** <br>
-    - 회원 정보 관리기능을 구현했습니다.
-
-- **구현 방법** <br>
-    - 비밀번호 초기화
-        - 비밀번호 분실 시 사용할 수 있는 API로 입력된 정보의 유효성을 검증한 뒤 난수 10자를 생성해 비밀번호를 업데이트한 뒤 해당 임시비밀번호를 이메일 전송모듈을 사용하여 이메일로 전송했습니다.
-    - 비밀번호 변경
-        - 본인의 기존 비밀번호와 신규비밀번호를 입력받아 기존비밀번호 일치 시 신규비밀번호로 업데이트 했습니다.
-    - 로그아웃
-        - 로그아웃 시 redis에 저장해두었던 `refreshToken` 을 삭제했습니다.
-</details>
-
-<details>
-  <summary>Posting 기능</summary>
-
-- **구현 기능** <br>
-    - 외부 게시글을 받아와 해시 태그를 사용하여 목록 / 상세 / 좋아요 / 공유 기능들을 제공합니다.
-
-- **구현 방법**<br>
-    - 외부 게시글을 받아와 Posting 형태로 DB에 저장하고 요청에 따라 목록 혹은 Posting을 가져옵니다. View, Like, Share 요청을 받는 경우, DB에 해당 내용을 업데이트 하는 식으로 구현했습니다.
-</details>
-
-<details>
-  <summary>통계 기능</summary>
-
-- **구현 기능** <br>
-    - 1Hour or 1Day 단위로 Posting/View/Like/Share Count 통계를 가져옵니다
-
-- **구현 방법**<br>
-    - 스프링 스케줄링 기능을 사용하여 @Scheduled 어노테이션을 이용해 1H 단위로 통계 메서드를 실행합니다. 사용자 통계 요청 시, DB에서 start~end 기간 중 해당 타입의 데이터를 가져옵니다.
-
-</details>
-<details>
-  <summary>검색 빈도가 높은 Tag 데이터 저장 기능</summary>
-
-- **구현 기능**<br>
-    - 주기적으로 검색에 사용하는 Tag 데이터를 저장하는 기능을 구현했습니다.
-
-- **구현 방법**<br>
-    - 스프링 스케줄링 기능을 사용하여 @Scheduled 어노테이션을 이용해 주기적으로 메서드를 실행합니다.
-        - saveScheduledTag() 메서드: 매 시간마다 실행되며, 최근 3시간 동안의 빈도 높은 태그를 저장합니다.
-</details>
-<details>
-  <summary>단기간 조회수 급상승 알림 기능</summary>
-
-- **구현 기능**<br>
-    - 주기적으로 상세검색에 사용하는 postingId 데이터를 저장하는 기능을 구현했습니다.
-
-- **구현 방법**<br>
-    - 스프링 스케줄링 기능을 사용하여 @Scheduled 어노테이션을 이용해 주기적으로 메서드를 실행합니다.
-        - checkOnFire() 메서드: 매 12시간마다 실행되며, 단기간에 급상승한 게시물을 확인하고 알림을 보냅니다.
-    - 단기간 조회수에 대한 조건을 추가로 설정했습니다.
-        - 조건 1) 12시간 동안 100번 이상 조회한 경우
-        - 조건 2) 12시간 동안 전체의 50% 보다 많은 경우 (생성된지 3시간 이상인 posting 조건이 포함)
-        - 조건 3) preView 높은 순으로 최대 10개
-
-</details>
-
-
-<details>
   <summary>CI 구축</summary>
 
 - **구현 기능** <br>
     - Github Actions를 통해 PR생성시 빌드, 테스트 자동화
 
 - **구현 방법**<br>
-  ![image](https://images-ext-2.discordapp.net/external/GuvYegAOwRmMTS-TCOOW4TnFy0sH3lVc_sibcPZlctk/https/github.com/7th-wanted-pre-onboarding-teamN/sns-feed/assets/86291408/3f849dc0-4710-4985-b2c0-459bd897c210?width=576&height=1056)
+    ```
+    name: Java CI with Gradle
+
+    #main, dev 브랜치에 push, pull_request시 작동
+    on:
+    push:
+    branches:
+    - main
+      - dev
+      pull_request:
+      branches:
+      - main
+      - dev
+    
+    jobs:
+    build:
+    runs-on: ubuntu-latest
+    #체크아웃 & secrets에 등록해놓은 설정파일을 빌드시 사용할 수 있게 복사
+    steps:
+    - uses: actions/checkout@v3
+      - run: mkdir ./src/main/resources
+      - run: touch ./src/main/resources/application.yml
+      - run: echo "${{secrets.APPLICATION}}" > ./src/main/resources/application.yml
+    
+          - name: Set up JDK 11
+            uses: actions/setup-java@v3
+            with:
+              java-version: '11'
+              distribution: 'temurin'
+            
+              #gradle빌드 권한
+          - name: Make gradlew executable
+            run: chmod +x ./gradlew
+          
+              #빌드
+          - name: Build with Gradle
+            uses: gradle/gradle-build-action@bd5760595778326ba7f1441bcf7e88b49de61a25 # v2.6.0
+            with:
+              arguments: build
+    
+              #빌드 실패 시 comment등록, pr closed
+              #if: ${{ failure() }} 를 사용하면 직전 스크립트가 실패 시 작동한다.
+          - name: If build fail
+            if: ${{ failure() }}
+            uses: actions/github-script@v6
+            with:
+              github-token: ${{ github.token }}
+              script: |
+                const pull_number = ${{ github.event.pull_request.number }}
+                const updated_title = `[BUILD FAIL] ${{ github.event.pull_request.title }}`
+                await github.rest.pulls.createReview({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: pull_number,
+                  body: '빌드에 실패했습니다.',
+                  event: 'REQUEST_CHANGES'
+                })
+                await github.rest.pulls.update({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: pull_number,
+                  title: updated_title,
+                  state: 'closed'
+                })
+    ```
+</details>
+
+<details>
+  <summary>CI 작동 확인</summary>
+
+![ci.png](readme_source/ci.png)
 </details>
 
 <details>
@@ -223,11 +186,50 @@
 
 </details>
 
+<details>
+  <summary>CD 작동확인</summary>
+
+![cd1.png](readme_source/cd1.png)
+![cd2.png](readme_source/cd2.png)
+</details>
+
 ## 시스템 구성도
 ![시스템 구성도](https://drive.google.com/uc?export=view&id=1k0sQtQ5S5BhZoroljc43S4tmxW5yyacz)
 
 ## ERD
 ![ERD](https://drive.google.com/uc?export=view&id=1aYq6CCC___1LNizJXIKTGTxxJM5qBSEI)
 
+## TIL 및 회고
+- 이번 프로젝트에서는 
 
+
+
+<details>
+  <summary>ISSUE: EC2 디스크 부족</summary>
+
+- 젠킨스 파이프라인 구성 후 젠킨스가 작동을 안하는 현상이 발생했다.
+- 원인
+  - 젠킨스 파이프라인에서 빌드의 반복으로 도커 이미지 빌드시 생성되는 임시파일들이 누적되어 용량부족
+- 해결 방법
+  - 도커 이미지 빌드시 생성되는 임시파일들을 삭제하는 명령어
+  - sudo docker system prune -a -f
+  - 해당 명령어를 pipeline에 넣어서 배포할 때마다 이전 임시파일들을 삭제하도록 했다.
+
+</details>
+
+<details>
+  <summary>ISSUE: WEBHOOK 미작동</summary>
+
+- 젠킨스에서 Generic Webhook Trigger 플러그인을 사용할 때 json에서 데이터를 받아서 사용하도록 설정을 했는데 
+웹 훅이 제대로 작동하지 않았다.
+- 원인
+  - Generic Webhook Trigger 플러그인에서 pull_request.merged가 true일 때 작동하도록 설정했는데 Github Webhook
+  Log를 확인해보니 해당 부분을 찾을 수 없었다.
+  - ![issue1.png](readme_source/issue1.png)
+
+- 해결 방법
+  - 깃허브 웹훅 설정에서 pull request를 제거하고 main브랜치에 push될 때만 작동하도록 설정을 변경하였다.
+  - 깃허브 로그에서 보내는 json을 확인하여 변수설정 수정 (push -> webhook -> main branch일 경우 배포)
+  - ![issue2.png](readme_source/issue2.png)
+</details>
 
